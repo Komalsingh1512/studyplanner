@@ -1,0 +1,15 @@
+Options -Indexes
+
+# Hide sensitive files
+<Files "db.php">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "*.sql">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# PHP error display band karo production mein
+php_flag display_errors off

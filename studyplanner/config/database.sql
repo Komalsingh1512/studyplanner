@@ -1,0 +1,55 @@
+-- Study Planner Database Setup
+-- Run this SQL in phpMyAdmin or MySQL CLI
+
+CREATE DATABASE IF NOT EXISTS study_planner;
+USE study_planner;
+
+-- Users table
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Subjects table
+CREATE TABLE IF NOT EXISTS subjects (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    total_topics INT DEFAULT 0,
+    completed_topics INT DEFAULT 0,
+    difficulty ENUM('easy', 'medium', 'hard') DEFAULT 'medium',
+    exam_date DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Study tasks table
+CREATE TABLE IF NOT EXISTS study_tasks (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    subject_id INT NOT NULL,
+    title VARCHAR(200) NOT NULL,
+    scheduled_date DATE NOT NULL,
+    start_time TIME,
+    duration_min INT DEFAULT 60,
+    is_completed TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE CASCADE
+);
+
+-- Progress log table
+CREATE TABLE IF NOT EXISTS progress_log (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    subject_id INT NOT NULL,
+    log_date DATE NOT NULL,
+    hours_studied DECIMAL(4,2) DEFAULT 0,
+    topics_covered TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE CASCADE
+);
