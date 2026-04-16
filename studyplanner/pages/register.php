@@ -58,27 +58,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <span class="eyebrow-dot"></span>
             Study Planner
         </div>
-        <h2>Start simple.</h2>
+        <h2>Start strong. 🌟</h2>
+        <p>Build your study system once and stay on track every week 📈</p>
 
         <div class="auth-feature-list">
             <div class="auth-feature-item">
                 <i class="bi bi-journal-bookmark-fill"></i>
                 <div>
-                    <strong>Subjects</strong>
+                    <strong>📘 Subjects</strong>
                     <span>Add syllabus</span>
                 </div>
             </div>
             <div class="auth-feature-item">
                 <i class="bi bi-check2-square"></i>
                 <div>
-                    <strong>Tasks</strong>
+                    <strong>🗓️ Tasks</strong>
                     <span>Add sessions</span>
                 </div>
             </div>
             <div class="auth-feature-item">
                 <i class="bi bi-graph-up-arrow"></i>
                 <div>
-                    <strong>Progress</strong>
+                    <strong>📊 Progress</strong>
                     <span>Stay on track</span>
                 </div>
             </div>
@@ -89,9 +90,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="auth-header">
             <div class="eyebrow mb-3">
                 <span class="eyebrow-dot"></span>
-                Register
+                Register 📝
             </div>
-            <h4>Create your account</h4>
+            <h4>Create your account 🎉</h4>
         </div>
 
         <?php if ($error): ?>
@@ -118,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label class="form-label">Confirm Password</label>
                 <input type="password" name="confirm_password" class="form-control" placeholder="Same password again" required>
             </div>
-            <button type="submit" class="btn btn-primary w-100">Register</button>
+            <button type="submit" class="btn btn-primary w-100">Create Account 🚀</button>
         </form>
 
         <p class="auth-meta">Already have an account? <a href="login.php">Login</a></p>

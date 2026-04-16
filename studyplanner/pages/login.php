@@ -48,27 +48,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <span class="eyebrow-dot"></span>
             Study Planner
         </div>
-        <h1>Study better.</h1>
+        <h1>Study smarter. ✨</h1>
+        <p>Plan your sessions, track progress, and keep momentum every day 🚀</p>
 
         <div class="auth-feature-list">
             <div class="auth-feature-item">
                 <i class="bi bi-grid-1x2-fill"></i>
                 <div>
-                    <strong>Subjects</strong>
+                    <strong>📚 Subjects</strong>
                     <span>Track progress</span>
                 </div>
             </div>
             <div class="auth-feature-item">
                 <i class="bi bi-clock-history"></i>
                 <div>
-                    <strong>Tasks</strong>
+                    <strong>✅ Tasks</strong>
                     <span>Plan your day</span>
                 </div>
             </div>
             <div class="auth-feature-item">
                 <i class="bi bi-stars"></i>
                 <div>
-                    <strong>AI Plan</strong>
+                    <strong>🤖 AI Plan</strong>
                     <span>Get a quick plan</span>
                 </div>
             </div>
@@ -79,9 +80,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="auth-header">
             <div class="eyebrow mb-3">
                 <span class="eyebrow-dot"></span>
-                Login
+                Login 🔐
             </div>
-            <h4>Welcome back</h4>
+            <h4>Welcome back 👋</h4>
         </div>
 
         <?php if ($error): ?>
@@ -97,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label class="form-label">Password</label>
                 <input type="password" name="password" class="form-control" placeholder="Your password" required>
             </div>
-            <button type="submit" class="btn btn-primary w-100">Login</button>
+            <button type="submit" class="btn btn-primary w-100">Login ✨</button>
         </form>
 
         <p class="auth-meta">New here? <a href="register.php">Create account</a></p>

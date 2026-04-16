@@ -76,6 +76,7 @@ while ($row = mysqli_fetch_assoc($tasks_result)) $tasks[] = $row;
                 <span><?= htmlspecialchars($user['name']) ?></span>
             </span>
             <a href="dashboard.php" class="btn btn-sm btn-outline-secondary">Dashboard</a>
+            <a href="notes.php" class="btn btn-sm btn-outline-secondary">Notes</a>
         </div>
     </div>
 </nav>
@@ -84,9 +85,10 @@ while ($row = mysqli_fetch_assoc($tasks_result)) $tasks[] = $row;
         <div>
             <div class="eyebrow">
                 <span class="eyebrow-dot"></span>
-                Tasks
+                Tasks ✅
             </div>
-            <h1 class="page-title">Manage tasks</h1>
+            <h1 class="page-title">Plan your study sessions</h1>
+            <p class="page-subtitle">Organize focused sessions, stay consistent, and finish more with less stress ⏳</p>
         </div>
     </div>
 
@@ -95,7 +97,7 @@ while ($row = mysqli_fetch_assoc($tasks_result)) $tasks[] = $row;
             <div class="sp-card fade-in-up">
                 <div class="sp-card-header">
                     <div>
-                        <h6 class="sp-card-title">Add New Task</h6>
+                        <h6 class="sp-card-title">Add New Task ✍️</h6>
                     </div>
                 </div>
                 <div class="sp-card-body">
@@ -131,7 +133,7 @@ while ($row = mysqli_fetch_assoc($tasks_result)) $tasks[] = $row;
                             <label class="form-label">Duration (minutes)</label>
                             <input type="number" name="duration_min" class="form-control" value="60" min="15" max="480">
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">Add Task</button>
+                        <button type="submit" class="btn btn-primary w-100">Add Task 🚀</button>
                     </form>
                     <?php endif; ?>
                 </div>
@@ -142,7 +144,7 @@ while ($row = mysqli_fetch_assoc($tasks_result)) $tasks[] = $row;
             <div class="sp-card fade-in-up">
                 <div class="sp-card-header">
                     <div>
-                        <h6 class="sp-card-title">Tasks</h6>
+                        <h6 class="sp-card-title">Tasks for the Day 🗓️</h6>
                     </div>
                     <form method="GET" class="filter-form">
                         <input type="date" name="date" class="form-control form-control-sm" value="<?= $filter_date ?>" style="width:160px;">
@@ -154,8 +156,8 @@ while ($row = mysqli_fetch_assoc($tasks_result)) $tasks[] = $row;
                         <div class="empty-state">
                             <div class="empty-state-inner">
                                 <div class="empty-state-icon"><i class="bi bi-calendar2-x"></i></div>
-                                <h3>No tasks for this date</h3>
-                                <p>Add a task.</p>
+                                <h3>No tasks for this date 😌</h3>
+                                <p>Add a task to give this day a clear mission.</p>
                             </div>
                         </div>
                     <?php else: ?>

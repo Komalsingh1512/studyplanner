@@ -59,6 +59,7 @@ foreach ($tasks as $t) {
             </span>
             <a href="subjects.php" class="btn btn-sm btn-outline-secondary">Subjects</a>
             <a href="tasks.php" class="btn btn-sm btn-outline-secondary">Tasks</a>
+            <a href="notes.php" class="btn btn-sm btn-outline-secondary">Notes</a>
             <a href="ai_plan.php" class="btn btn-sm btn-primary">AI Plan</a>
             <a href="logout.php" class="btn btn-sm btn-outline-danger">Logout</a>
         </div>
@@ -71,33 +72,40 @@ foreach ($tasks as $t) {
             <div class="hero-copy">
                 <div class="eyebrow">
                     <span class="eyebrow-dot"></span>
-                    Dashboard
+                    Dashboard ✨
                 </div>
-                <h2>Hello, <?= htmlspecialchars($user['name']) ?></h2>
+                <h2>Hello, <?= htmlspecialchars($user['name']) ?> 👋</h2>
+                <p>Your study space is ready. Let’s turn today into real progress 🎯</p>
                 <div class="hero-chip-row">
-                    <div class="hero-chip"><i class="bi bi-calendar-event"></i> <?= date('d M Y') ?></div>
-                    <div class="hero-chip"><i class="bi bi-check2-circle"></i> <?= $completed_today ?> done</div>
-                    <div class="hero-chip"><i class="bi bi-journal-richtext"></i> <?= $total_subjects ?> subjects</div>
+                    <div class="hero-chip"><i class="bi bi-calendar-event"></i> Today: <?= date('d M Y') ?></div>
+                    <div class="hero-chip"><i class="bi bi-check2-circle"></i> <?= $completed_today ?> wins ✅</div>
+                    <div class="hero-chip"><i class="bi bi-journal-richtext"></i> <?= $total_subjects ?> subjects 📚</div>
                 </div>
             </div>
             <aside class="hero-side-card">
-                <h3>Quick actions</h3>
+                <h3>Quick actions ⚡</h3>
                 <div class="hero-side-list">
                     <div class="hero-side-list-item">
                         <div>
-                            <strong>Subjects</strong>
+                            <strong>📚 Subjects</strong>
                         </div>
                         <a href="subjects.php" class="btn btn-sm btn-light">Open</a>
                     </div>
                     <div class="hero-side-list-item">
                         <div>
-                            <strong>Tasks</strong>
+                            <strong>✅ Tasks</strong>
                         </div>
                         <a href="tasks.php" class="btn btn-sm btn-light">Open</a>
                     </div>
                     <div class="hero-side-list-item">
                         <div>
-                            <strong>AI Plan</strong>
+                            <strong>📝 Notes</strong>
+                        </div>
+                        <a href="notes.php" class="btn btn-sm btn-light">Open</a>
+                    </div>
+                    <div class="hero-side-list-item">
+                        <div>
+                            <strong>🤖 AI Plan</strong>
                         </div>
                         <a href="ai_plan.php" class="btn btn-sm btn-light">Launch</a>
                     </div>
@@ -150,17 +158,17 @@ foreach ($tasks as $t) {
             <div class="sp-card fade-in-up">
                 <div class="sp-card-header">
                     <div>
-                        <h6 class="sp-card-title">My Subjects</h6>
+                        <h6 class="sp-card-title">My Subjects 📚</h6>
                     </div>
-                    <a href="subjects.php" class="btn btn-sm sp-btn-add">+ Add Subject</a>
+                    <a href="subjects.php" class="btn btn-sm sp-btn-add">+ Add Subject ✨</a>
                 </div>
                 <div class="sp-card-body">
                     <?php if (empty($subjects)): ?>
                         <div class="empty-state">
                             <div class="empty-state-inner">
                                 <div class="empty-state-icon"><i class="bi bi-journal-plus"></i></div>
-                                <h3>No subjects yet</h3>
-                                <p>Add your first subject.</p>
+                                <h3>No subjects yet 📘</h3>
+                                <p>Add your first subject and start building your study map.</p>
                             </div>
                         </div>
                     <?php else: ?>
@@ -213,18 +221,18 @@ foreach ($tasks as $t) {
             <div class="sp-card fade-in-up">
                 <div class="sp-card-header">
                     <div>
-                        <h6 class="sp-card-title">Today's Tasks</h6>
+                        <h6 class="sp-card-title">Today's Tasks ✅</h6>
                         <p class="sp-card-subtitle"><?= date('d M Y') ?></p>
                     </div>
-                    <a href="tasks.php" class="btn btn-sm sp-btn-add">+ Add Task</a>
+                    <a href="tasks.php" class="btn btn-sm sp-btn-add">+ Add Task 🚀</a>
                 </div>
                 <div class="sp-card-body">
                     <?php if (empty($tasks)): ?>
                         <div class="empty-state">
                             <div class="empty-state-inner">
                                 <div class="empty-state-icon"><i class="bi bi-calendar2-plus"></i></div>
-                                <h3>No tasks today</h3>
-                                <p>Add a task.</p>
+                                <h3>No tasks today 🎉</h3>
+                                <p>Add a task and give your day a clear target.</p>
                             </div>
                         </div>
                     <?php else: ?>
@@ -255,7 +263,7 @@ foreach ($tasks as $t) {
             <div class="sp-card fade-in-up">
                 <div class="sp-card-header">
                     <div>
-                        <h6 class="sp-card-title">Study Pulse</h6>
+                        <h6 class="sp-card-title">Study Pulse 💡</h6>
                     </div>
                 </div>
                 <div class="sp-card-body">

@@ -91,6 +91,7 @@ while ($row = mysqli_fetch_assoc($subjects_result)) {
                 <span><?= htmlspecialchars($user['name']) ?></span>
             </span>
             <a href="dashboard.php" class="btn btn-sm btn-outline-secondary">Dashboard</a>
+            <a href="notes.php" class="btn btn-sm btn-outline-secondary">Notes</a>
         </div>
     </div>
 </nav>
@@ -100,9 +101,10 @@ while ($row = mysqli_fetch_assoc($subjects_result)) {
         <div>
             <div class="eyebrow">
                 <span class="eyebrow-dot"></span>
-                Subjects
+                Subjects 📚
             </div>
-            <h1 class="page-title">Manage subjects</h1>
+            <h1 class="page-title">Manage subjects like a pro</h1>
+            <p class="page-subtitle">Track syllabus, monitor deadlines, and jump into notes or chat in one place ✨</p>
         </div>
     </div>
 
@@ -111,7 +113,7 @@ while ($row = mysqli_fetch_assoc($subjects_result)) {
             <div class="sp-card fade-in-up">
                 <div class="sp-card-header">
                     <div>
-                        <h6 class="sp-card-title">Add New Subject</h6>
+                        <h6 class="sp-card-title">Add New Subject ✍️</h6>
                     </div>
                 </div>
                 <div class="sp-card-body">
@@ -143,7 +145,7 @@ while ($row = mysqli_fetch_assoc($subjects_result)) {
                             <label class="form-label">Exam Date</label>
                             <input type="date" name="exam_date" class="form-control">
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">Add Subject</button>
+                        <button type="submit" class="btn btn-primary w-100">Add Subject 🚀</button>
                     </form>
                 </div>
             </div>
@@ -153,7 +155,7 @@ while ($row = mysqli_fetch_assoc($subjects_result)) {
             <div class="sp-card fade-in-up">
                 <div class="sp-card-header">
                     <div>
-                        <h6 class="sp-card-title">My Subjects</h6>
+                        <h6 class="sp-card-title">My Subjects 🌈</h6>
                     </div>
                 </div>
                 <div class="sp-card-body">
@@ -161,8 +163,8 @@ while ($row = mysqli_fetch_assoc($subjects_result)) {
                         <div class="empty-state">
                             <div class="empty-state-inner">
                                 <div class="empty-state-icon"><i class="bi bi-journal-plus"></i></div>
-                                <h3>No subjects yet</h3>
-                                <p>Add your first subject.</p>
+                                <h3>No subjects yet 📘</h3>
+                                <p>Add your first subject and start tracking progress beautifully.</p>
                             </div>
                         </div>
                     <?php else: ?>
@@ -195,7 +197,7 @@ while ($row = mysqli_fetch_assoc($subjects_result)) {
                                     <?php endif; ?>
                                     <a href="?delete=<?= $sub['id'] ?>"
                                        onclick="return confirm('Are you sure you want to delete?')"
-                                       class="btn btn-sm btn-outline-danger">Delete</a>
+                                       class="btn btn-sm btn-outline-danger">Delete 🗑️</a>
                                 </div>
                             </div>
                             <div class="progress">
@@ -209,9 +211,19 @@ while ($row = mysqli_fetch_assoc($subjects_result)) {
                                 <input type="number" name="completed_topics" value="<?= $sub['completed_topics'] ?>"
                                        min="0" max="<?= $sub['total_topics'] ?>" class="form-control form-control-sm" style="width:100px;">
                                 <span class="section-note">/ <?= $sub['total_topics'] ?></span>
-                                <button type="submit" class="btn btn-sm btn-outline-success">Update</button>
+                                <button type="submit" class="btn btn-sm btn-outline-success">Update ✅</button>
                                 <span class="ms-auto section-note"><?= $sub['completed_topics'] ?> done</span>
                             </form>
+                            <div class="subject-tools">
+                                <a href="notes.php?subject_id=<?= $sub['id'] ?>" class="subject-tool-card">
+                                    <span class="subject-tool-icon"><i class="bi bi-journal-text"></i></span>
+                                    <span>Notes</span>
+                                </a>
+                                <a href="chat.php?subject_id=<?= $sub['id'] ?>" class="subject-tool-card">
+                                    <span class="subject-tool-icon"><i class="bi bi-chat-dots"></i></span>
+                                    <span>Chat</span>
+                                </a>
+                            </div>
                         </div>
                         <?php endforeach; ?>
                     <?php endif; ?>
