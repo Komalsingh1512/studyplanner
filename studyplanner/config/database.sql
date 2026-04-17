@@ -66,6 +66,19 @@ CREATE TABLE IF NOT EXISTS subject_notes (
     FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE CASCADE
 );
 
+-- Subject subtopics table
+CREATE TABLE IF NOT EXISTS subject_subtopics (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    subject_id INT NOT NULL,
+    title VARCHAR(180) NOT NULL,
+    note_content TEXT,
+    is_completed TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE CASCADE
+);
+
 -- Subject chat messages table
 CREATE TABLE IF NOT EXISTS subject_chat_messages (
     id INT AUTO_INCREMENT PRIMARY KEY,

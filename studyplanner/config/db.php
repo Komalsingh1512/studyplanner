@@ -25,6 +25,20 @@ $notes_table_sql = "CREATE TABLE IF NOT EXISTS subject_notes (
 
 mysqli_query($conn, $notes_table_sql);
 
+$subtopics_table_sql = "CREATE TABLE IF NOT EXISTS subject_subtopics (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    subject_id INT NOT NULL,
+    title VARCHAR(180) NOT NULL,
+    note_content TEXT,
+    is_completed TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE CASCADE
+)";
+
+mysqli_query($conn, $subtopics_table_sql);
+
 $chat_messages_table_sql = "CREATE TABLE IF NOT EXISTS subject_chat_messages (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,

@@ -69,6 +69,19 @@ $subjects = [];
 while ($row = mysqli_fetch_assoc($subjects_result)) {
     $subjects[] = $row;
 }
+
+$subtopics_by_subject = [];
+$subtopics_result = mysqli_query(
+    $conn,
+    "SELECT * FROM subject_subtopics WHERE user_id = $uid ORDER BY is_completed ASC, created_at DESC, id DESC"
+);
+while ($row = mysqli_fetch_assoc($subtopics_result)) {
+    $subject_id = (int)$row['subject_id'];
+    if (!isset($subtopics_by_subject[$subject_id])) {
+        $subtopics_by_subject[$subject_id] = [];
+    }
+    $subtopics_by_subject[$subject_id][] = $row;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -172,6 +185,13 @@ while ($row = mysqli_fetch_assoc($subjects_result)) {
                             $pct = $sub['total_topics'] > 0
                                 ? round(($sub['completed_topics'] / $sub['total_topics']) * 100)
                                 : 0;
+                            $subject_subtopics = $subtopics_by_subject[(int)$sub['id']] ?? [];
+                            $completed_subtopics = 0;
+                            foreach ($subject_subtopics as $subject_subtopic) {
+                                if ((int)$subject_subtopic['is_completed'] === 1) {
+                                    $completed_subtopics++;
+                                }
+                            }
                             $days_left = $sub['exam_date']
                                     ? (int)((strtotime($sub['exam_date']) - time()) / 86400)
                                     : null;
@@ -185,6 +205,7 @@ while ($row = mysqli_fetch_assoc($subjects_result)) {
                                     <div class="subject-tags mt-2">
                                         <span class="soft-badge"><i class="bi bi-layers"></i><?= $sub['total_topics'] ?> total topics</span>
                                         <span class="soft-badge"><i class="bi bi-bar-chart-line"></i><?= $pct ?>%</span>
+                                        <span class="soft-badge"><i class="bi bi-diagram-3"></i><?= $completed_subtopics ?>/<?= count($subject_subtopics) ?> subtopics</span>
                                         <span class="badge <?= $badge ?> ms-1" style="font-size:11px;"><?= htmlspecialchars($sub['difficulty']) ?></span>
                                     </div>
                                 </div>
@@ -215,6 +236,10 @@ while ($row = mysqli_fetch_assoc($subjects_result)) {
                                 <span class="ms-auto section-note"><?= $sub['completed_topics'] ?> done</span>
                             </form>
                             <div class="subject-tools">
+                                <a href="subject_workspace.php?subject_id=<?= $sub['id'] ?>" class="subject-tool-card">
+                                    <span class="subject-tool-icon"><i class="bi bi-diagram-3"></i></span>
+                                    <span>Workspace</span>
+                                </a>
                                 <a href="notes.php?subject_id=<?= $sub['id'] ?>" class="subject-tool-card">
                                     <span class="subject-tool-icon"><i class="bi bi-journal-text"></i></span>
                                     <span>Notes</span>
