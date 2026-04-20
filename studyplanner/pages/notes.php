@@ -56,7 +56,7 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'deleted') {
 }
 
 $subjects = [];
-$subjects_result = mysqli_query($conn, "SELECT id, name FROM subjects WHERE user_id = $uid ORDER BY name ASC");
+$subjects_result = mysqli_query($conn, "SELECT id, name FROM subjects WHERE user_id = $uid ORDER BY created_at DESC, id DESC");
 while ($row = mysqli_fetch_assoc($subjects_result)) {
     $subjects[] = $row;
 }

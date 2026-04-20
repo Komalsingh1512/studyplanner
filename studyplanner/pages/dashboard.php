@@ -7,7 +7,7 @@ $user = getCurrentUser();
 $uid  = $user['id'];
 
 // Subjects fetch
-$subjects_result = mysqli_query($conn, "SELECT * FROM subjects WHERE user_id = $uid ORDER BY exam_date ASC");
+$subjects_result = mysqli_query($conn, "SELECT * FROM subjects WHERE user_id = $uid ORDER BY created_at DESC, id DESC");
 $subjects = [];
 while ($row = mysqli_fetch_assoc($subjects_result)) {
     $subjects[] = $row;

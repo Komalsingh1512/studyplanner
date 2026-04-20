@@ -25,12 +25,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     } elseif ($completed > $total) {
         $error = "Completed topics cannot be more than total topics!";
     } else {
-        $stmt = mysqli_prepare($conn,
+        $stmt = mysqli_prepare(
+            $conn,
             "INSERT INTO subjects (user_id, name, total_topics, completed_topics, difficulty, exam_date)
-             VALUES (?, ?, ?, ?, ?, ?)");
+             VALUES (?, ?, ?, ?, ?, ?)"
+        );
         mysqli_stmt_bind_param($stmt, "isiiss", $uid, $name, $total, $completed, $difficulty, $exam_date);
         if (mysqli_stmt_execute($stmt)) {
-            $success = "Subject add ho gaya!";
+            $success = "Subject added successfully!";
         } else {
             $error = "Unable to add subject. " . mysqli_error($conn);
         }
@@ -60,11 +62,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $error = "Completed topics cannot be more than total topics!";
     } else {
         mysqli_query($conn, "UPDATE subjects SET completed_topics = $completed WHERE id = $sub_id AND user_id = $uid");
-        $success = "Progress update ho gaya!";
+        $success = "Progress updated successfully!";
     }
 }
 
-$subjects_result = mysqli_query($conn, "SELECT * FROM subjects WHERE user_id = $uid ORDER BY exam_date ASC");
+if (isset($_GET['msg']) && $_GET['msg'] === 'deleted') {
+    $success = "Subject removed successfully!";
+}
+
+$subjects_result = mysqli_query($conn, "SELECT * FROM subjects WHERE user_id = $uid ORDER BY created_at DESC, id DESC");
 $subjects = [];
 while ($row = mysqli_fetch_assoc($subjects_result)) {
     $subjects[] = $row;
@@ -88,7 +94,7 @@ while ($row = mysqli_fetch_assoc($subtopics_result)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Subjects — Study Planner</title>
+    <title>Subjects - Study Planner</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="../assets/css/style.css?v=20260406-1433">
@@ -130,8 +136,8 @@ while ($row = mysqli_fetch_assoc($subtopics_result)) {
                     </div>
                 </div>
                 <div class="sp-card-body">
-                    <?php if ($error): ?><div class="alert alert-danger"><?= $error ?></div><?php endif; ?>
-                    <?php if ($success): ?><div class="alert alert-success"><?= $success ?></div><?php endif; ?>
+                    <?php if ($error): ?><div class="alert alert-danger"><?= htmlspecialchars($error) ?></div><?php endif; ?>
+                    <?php if ($success): ?><div class="alert alert-success"><?= htmlspecialchars($success) ?></div><?php endif; ?>
                     <form method="POST">
                         <input type="hidden" name="action" value="add">
                         <div class="mb-3">
@@ -193,10 +199,10 @@ while ($row = mysqli_fetch_assoc($subtopics_result)) {
                                 }
                             }
                             $days_left = $sub['exam_date']
-                                    ? (int)((strtotime($sub['exam_date']) - time()) / 86400)
-                                    : null;
-                            $badge = $sub['difficulty'] === 'easy' ? 'bg-success' :
-                                    ($sub['difficulty'] === 'hard' ? 'bg-danger' : 'bg-warning text-dark');
+                                ? (int)((strtotime($sub['exam_date']) - time()) / 86400)
+                                : null;
+                            $badge = $sub['difficulty'] === 'easy' ? 'bg-success'
+                                : ($sub['difficulty'] === 'hard' ? 'bg-danger' : 'bg-warning text-dark');
                         ?>
                         <div class="subject-row">
                             <div class="subject-row-top">
@@ -213,7 +219,7 @@ while ($row = mysqli_fetch_assoc($subtopics_result)) {
                                     <?php if ($days_left !== null): ?>
                                         <span class="pill <?= $days_left < 0 ? 'pill-danger' : ($days_left <= 7 ? 'pill-warning' : 'pill-success') ?>">
                                             <i class="bi bi-calendar2-week"></i>
-                                            <?= $days_left >= 0 ? $days_left.' days left' : 'Exam passed' ?>
+                                            <?= $days_left >= 0 ? $days_left . ' days left' : 'Exam passed' ?>
                                         </span>
                                     <?php endif; ?>
                                     <a href="?delete=<?= $sub['id'] ?>"

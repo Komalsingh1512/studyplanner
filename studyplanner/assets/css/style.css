@@ -1193,6 +1193,77 @@ a:hover {
     flex-shrink: 0;
 }
 
+.chat-layout {
+    display: grid;
+    grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
+}
+
+.chat-side-panel,
+.chat-main-panel {
+    min-height: 680px;
+}
+
+.chat-status-panel {
+    display: grid;
+    gap: 0.75rem;
+    padding: 0.95rem 1rem;
+    border-radius: 1rem;
+    background: linear-gradient(180deg, rgba(255,255,255,0.86), rgba(241,245,255,0.82));
+    border: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.chat-status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.chat-tab-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+}
+
+.chat-mode-tab {
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    background: rgba(255, 255, 255, 0.76);
+    color: var(--text);
+    padding: 0.65rem 1rem;
+    border-radius: 999px;
+    font-weight: 700;
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.05);
+}
+
+.chat-mode-tab.active {
+    background: linear-gradient(135deg, #0f172a, #2563eb 58%, #14b8a6 100%);
+    color: #fff;
+    border-color: transparent;
+}
+
+.chat-thread-large {
+    min-height: 460px;
+    max-height: 460px;
+    overflow-y: auto;
+    padding-right: 0.3rem;
+}
+
+.chat-compose-form {
+    margin-top: 1rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.8rem;
+    align-items: end;
+}
+
+.chat-compose-textarea {
+    min-height: 88px;
+    resize: vertical;
+}
+
 .fade-in-up {
     animation: fadeInUp 0.55s ease both;
 }
@@ -1219,7 +1290,8 @@ a:hover {
 
 @media (max-width: 991.98px) {
     .auth-layout,
-    .hero-grid {
+    .hero-grid,
+    .chat-layout {
         grid-template-columns: 1fr;
     }
 
@@ -1282,7 +1354,8 @@ a:hover {
 
     .filter-form,
     .inline-form,
-    .subtopic-add-form {
+    .subtopic-add-form,
+    .chat-compose-form {
         flex-direction: column;
         align-items: stretch;
     }
@@ -1292,7 +1365,9 @@ a:hover {
     .inline-form .form-control,
     .inline-form .btn,
     .subtopic-add-form .form-control,
-    .subtopic-add-form .btn {
+    .subtopic-add-form .btn,
+    .chat-compose-form .form-control,
+    .chat-compose-form .btn {
         width: 100%;
     }
 

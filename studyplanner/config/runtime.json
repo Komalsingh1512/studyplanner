@@ -1,0 +1,12 @@
+{
+  "groq": {
+    "api_key": "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",
+    "model": "llama-3.1-8b-instant",
+    "api_url": "https://api.groq.com/openai/v1/chat/completions"
+  },
+  "realtime": {
+    "ws_url": "ws://127.0.0.1:8081",
+    "internal_base_url": "http://127.0.0.1/studyplanner/studyplanner",
+    "shared_secret": "studyplanner-realtime-secret-2026-04-20-secure-channel"
+  }
+}

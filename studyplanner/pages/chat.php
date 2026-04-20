@@ -1,148 +1,20 @@
 <?php
 require_once '../includes/auth.php';
 require_once '../config/db.php';
-require_once '../config/ai.php';
+require_once '../config/runtime.php';
 requireLogin();
 
 $user = getCurrentUser();
 $uid = $user['id'];
 $subjects = [];
-$subjects_result = mysqli_query($conn, "SELECT * FROM subjects WHERE user_id = $uid ORDER BY name ASC");
+$subjects_result = mysqli_query($conn, "SELECT * FROM subjects WHERE user_id = $uid ORDER BY created_at DESC, id DESC");
 while ($row = mysqli_fetch_assoc($subjects_result)) {
     $subjects[] = $row;
 }
 
-$selected_subject = isset($_GET['subject_id']) ? (int)$_GET['subject_id'] : 0;
-$error = '';
-$success = '';
-$api_key_value = getAiApiKey();
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'ask') {
-    $selected_subject = (int)$_POST['subject_id'];
-    $question = trim($_POST['question']);
-    $submitted_api_key = isset($_POST['api_key']) ? trim($_POST['api_key']) : '';
-
-    if ($submitted_api_key !== '') {
-        $_SESSION['anthropic_api_key'] = $submitted_api_key;
-        $api_key_value = getAiApiKey();
-    }
-
-    $subject_data = null;
-    foreach ($subjects as $subject) {
-        if ((int)$subject['id'] === $selected_subject) {
-            $subject_data = $subject;
-            break;
-        }
-    }
-
-    if (!$subject_data) {
-        $error = "Please select a valid subject!";
-    } elseif ($question === '') {
-        $error = "Please enter your question!";
-    } elseif (empty($api_key_value)) {
-        $error = "Add your Anthropic API key first.";
-    } elseif (!function_exists('curl_init')) {
-        $error = "cURL is not enabled in PHP.";
-    } else {
-        $history = [];
-        $history_query = mysqli_query(
-            $conn,
-            "SELECT role, message_text FROM subject_chat_messages
-             WHERE user_id = $uid AND subject_id = $selected_subject
-             ORDER BY created_at DESC, id DESC
-             LIMIT 8"
-        );
-        while ($row = mysqli_fetch_assoc($history_query)) {
-            $history[] = $row;
-        }
-        $history = array_reverse($history);
-
-        $escaped_question = mysqli_real_escape_string($conn, $question);
-        mysqli_query($conn, "INSERT INTO subject_chat_messages (user_id, subject_id, role, message_text) VALUES ($uid, $selected_subject, 'user', '$escaped_question')");
-
-        $completion = $subject_data['total_topics'] > 0
-            ? round(($subject_data['completed_topics'] / $subject_data['total_topics']) * 100)
-            : 0;
-
-        $messages_payload = [[
-            'role' => 'user',
-            'content' => "You are a subject tutor for {$subject_data['name']}. Student name: {$user['name']}. Completion: {$completion}%. Difficulty: {$subject_data['difficulty']}. Answer in clear Hinglish, be exam-focused, and keep explanations practical."
-        ]];
-
-        foreach ($history as $item) {
-            $messages_payload[] = [
-                'role' => $item['role'],
-                'content' => $item['message_text']
-            ];
-        }
-
-        $messages_payload[] = [
-            'role' => 'user',
-            'content' => $question
-        ];
-
-        $payload = json_encode([
-            'model' => AI_MODEL,
-            'max_tokens' => 1400,
-            'messages' => $messages_payload
-        ]);
-
-        $ch = curl_init('https://api.anthropic.com/v1/messages');
-        curl_setopt_array($ch, [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => $payload,
-            CURLOPT_HTTPHEADER => [
-                'Content-Type: application/json',
-                'x-api-key: ' . $api_key_value,
-                'anthropic-version: 2023-06-01'
-            ],
-            CURLOPT_TIMEOUT => 60
-        ]);
-
-        $response = curl_exec($ch);
-        $curl_error = curl_error($ch);
-        $http_code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        if ($response === false) {
-            $error = "Request failed: " . $curl_error;
-        } else {
-            $data = json_decode($response, true);
-            if ($http_code === 200 && isset($data['content'][0]['text'])) {
-                $answer = $data['content'][0]['text'];
-                $stmt = mysqli_prepare($conn, "INSERT INTO subject_chat_messages (user_id, subject_id, role, message_text) VALUES (?, ?, 'assistant', ?)");
-                mysqli_stmt_bind_param($stmt, "iis", $uid, $selected_subject, $answer);
-                mysqli_stmt_execute($stmt);
-                $success = "Reply generated.";
-            } elseif (isset($data['error']['message'])) {
-                $error = $data['error']['message'];
-            } else {
-                $error = "Unable to get a response right now. HTTP $http_code";
-            }
-        }
-    }
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'clear') {
-    $selected_subject = (int)$_POST['subject_id'];
-    mysqli_query($conn, "DELETE FROM subject_chat_messages WHERE user_id = $uid AND subject_id = $selected_subject");
-    $success = "Chat cleared.";
-}
-
-$messages = [];
-if ($selected_subject > 0) {
-    $messages_result = mysqli_query(
-        $conn,
-        "SELECT m.*, s.name AS subject_name
-         FROM subject_chat_messages m
-         JOIN subjects s ON s.id = m.subject_id
-         WHERE m.user_id = $uid AND m.subject_id = $selected_subject
-         ORDER BY m.created_at ASC, m.id ASC"
-    );
-    while ($row = mysqli_fetch_assoc($messages_result)) {
-        $messages[] = $row;
-    }
+$selected_subject = isset($_GET['subject_id']) ? (int) $_GET['subject_id'] : 0;
+if ($selected_subject === 0 && !empty($subjects)) {
+    $selected_subject = (int) $subjects[0]['id'];
 }
 ?>
 <!DOCTYPE html>
@@ -150,7 +22,7 @@ if ($selected_subject > 0) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat - Study Planner</title>
+    <title>Realtime Chat - Study Planner</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="../assets/css/style.css?v=20260406-1433">
@@ -174,94 +46,326 @@ if ($selected_subject > 0) {
 <div class="page-wrap">
     <div class="page-header fade-in-up">
         <div>
-            <div class="eyebrow"><span class="eyebrow-dot"></span> Chat 💬</div>
-            <h1 class="page-title">Ask subject doubts instantly</h1>
-            <p class="page-subtitle">Keep a smart subject-wise AI conversation for concepts, revision, and exam prep 🤖</p>
+            <div class="eyebrow">
+                <span class="eyebrow-dot"></span>
+                Realtime Chat 🔒
+            </div>
+            <h1 class="page-title">Study chat with AI and students</h1>
+            <p class="page-subtitle">Use a secure WebSocket connection for Groq-powered AI tutoring and a live student room for each subject.</p>
         </div>
     </div>
 
-    <div class="row g-4">
-        <div class="col-md-4">
-            <div class="sp-card fade-in-up">
-                <div class="sp-card-header"><h6 class="sp-card-title">Ask Anything 🤔</h6></div>
-                <div class="sp-card-body">
-                    <?php if ($error): ?><div class="alert alert-danger"><?= htmlspecialchars($error) ?></div><?php endif; ?>
-                    <?php if ($success): ?><div class="alert alert-success"><?= htmlspecialchars($success) ?></div><?php endif; ?>
-                    <?php if (empty($subjects)): ?>
-                        <div class="alert alert-warning">Please <a href="subjects.php">add a subject</a> first.</div>
-                    <?php else: ?>
-                    <form method="POST">
-                        <input type="hidden" name="action" value="ask">
-                        <div class="mb-3">
-                            <label class="form-label">Anthropic API Key</label>
-                            <input type="password" name="api_key" class="form-control" placeholder="sk-ant-..." value="<?= htmlspecialchars($api_key_value) ?>">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Subject *</label>
-                            <select name="subject_id" class="form-select" required>
-                                <option value="">Select subject</option>
-                                <?php foreach ($subjects as $subject): ?>
-                                    <option value="<?= $subject['id'] ?>" <?= $selected_subject === (int)$subject['id'] ? 'selected' : '' ?>>
-                                        <?= htmlspecialchars($subject['name']) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Question *</label>
-                            <textarea name="question" class="form-control notes-textarea compact-textarea" placeholder="Ask a doubt, concept question, or exam question" required></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Send 🚀</button>
-                    </form>
-                    <?php if ($selected_subject > 0): ?>
-                    <form method="POST" class="mt-3">
-                        <input type="hidden" name="action" value="clear">
-                        <input type="hidden" name="subject_id" value="<?= $selected_subject ?>">
-                        <button type="submit" class="btn btn-outline-danger w-100" onclick="return confirm('Clear this subject chat?');">Clear Chat 🧹</button>
-                    </form>
-                    <?php endif; ?>
-                    <?php endif; ?>
-                </div>
+    <?php if (empty($subjects)): ?>
+        <div class="empty-state">
+            <div class="empty-state-inner">
+                <div class="empty-state-icon"><i class="bi bi-chat-square-dots"></i></div>
+                <h3>No subjects yet</h3>
+                <p>Add a subject first, then open chat for that subject.</p>
+                <a href="subjects.php" class="btn btn-primary mt-3">Go to Subjects</a>
             </div>
         </div>
-
-        <div class="col-md-8">
-            <div class="sp-card fade-in-up">
+    <?php else: ?>
+        <div class="chat-layout">
+            <aside class="sp-card fade-in-up chat-side-panel">
                 <div class="sp-card-header">
-                    <h6 class="sp-card-title">Conversation Thread 💭</h6>
+                    <h6 class="sp-card-title">Chat Controls ⚙️</h6>
                 </div>
                 <div class="sp-card-body">
-                    <?php if ($selected_subject === 0): ?>
-                        <div class="empty-state">
-                            <div class="empty-state-inner">
-                                <div class="empty-state-icon"><i class="bi bi-chat-dots"></i></div>
-                                <h3>Select a subject first 📘</h3>
-                                <p>Then ask questions and keep a focused study chat.</p>
-                            </div>
-                        </div>
-                    <?php elseif (empty($messages)): ?>
-                        <div class="empty-state">
-                            <div class="empty-state-inner">
-                                <div class="empty-state-icon"><i class="bi bi-chat-square-heart"></i></div>
-                                <h3>No chat yet 💬</h3>
-                                <p>Ask your first subject doubt to start the conversation.</p>
-                            </div>
-                        </div>
-                    <?php else: ?>
-                        <div class="chat-thread">
-                            <?php foreach ($messages as $message): ?>
-                                <div class="chat-bubble <?= $message['role'] === 'assistant' ? 'chat-bubble-ai' : 'chat-bubble-user' ?>">
-                                    <div class="chat-meta"><?= $message['role'] === 'assistant' ? 'AI Tutor' : 'You' ?></div>
-                                    <div><?= nl2br(htmlspecialchars($message['message_text'])) ?></div>
-                                </div>
+                    <div class="mb-3">
+                        <label class="form-label">Subject</label>
+                        <select id="subjectSelect" class="form-select">
+                            <?php foreach ($subjects as $subject): ?>
+                                <option value="<?= $subject['id'] ?>" <?= $selected_subject === (int) $subject['id'] ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($subject['name']) ?>
+                                </option>
                             <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="chat-status-panel">
+                        <div class="chat-status-row">
+                            <span class="section-note">Connection</span>
+                            <span id="connectionBadge" class="pill pill-warning">Connecting</span>
                         </div>
-                    <?php endif; ?>
+                        <div class="chat-status-row">
+                            <span class="section-note">Groq Model</span>
+                            <span class="soft-badge">llama-3.1-8b-instant</span>
+                        </div>
+                        <div class="chat-status-row">
+                            <span class="section-note">Transport</span>
+                            <span class="soft-badge">WebSocket</span>
+                        </div>
+                    </div>
+
+                    <div class="subject-tools mt-3">
+                        <a id="workspaceLink" href="subject_workspace.php?subject_id=<?= $selected_subject ?>" class="subject-tool-card">
+                            <span class="subject-tool-icon"><i class="bi bi-diagram-3"></i></span>
+                            <span>Workspace</span>
+                        </a>
+                        <a id="notesLink" href="notes.php?subject_id=<?= $selected_subject ?>" class="subject-tool-card">
+                            <span class="subject-tool-icon"><i class="bi bi-journal-text"></i></span>
+                            <span>Notes</span>
+                        </a>
+                    </div>
+                </div>
+            </aside>
+
+            <section class="sp-card fade-in-up chat-main-panel">
+                <div class="sp-card-header">
+                    <div>
+                        <h6 class="sp-card-title" id="chatPanelTitle">Realtime Chat 💬</h6>
+                        <p class="sp-card-subtitle" id="chatPanelSubtitle">Choose how you want to study.</p>
+                    </div>
+                    <div class="chat-tab-row">
+                        <button class="chat-mode-tab active" data-mode="ai">AI Tutor 🤖</button>
+                        <button class="chat-mode-tab" data-mode="room">Student Room 👥</button>
+                    </div>
+                </div>
+                <div class="sp-card-body">
+                    <div id="chatError" class="alert alert-danger d-none"></div>
+                    <div id="chatThread" class="chat-thread chat-thread-large"></div>
+                    <form id="chatForm" class="chat-compose-form">
+                        <textarea id="chatInput" class="form-control chat-compose-textarea" placeholder="Type your message..."></textarea>
+                        <button type="submit" class="btn btn-primary">Send 🚀</button>
+                    </form>
+                </div>
+            </section>
+        </div>
+    <?php endif; ?>
+</div>
+</div>
+
+<?php if (!empty($subjects)): ?>
+<script>
+const bootstrapUrl = '../api/chat_bootstrap.php';
+const subjectSelect = document.getElementById('subjectSelect');
+const chatThread = document.getElementById('chatThread');
+const chatForm = document.getElementById('chatForm');
+const chatInput = document.getElementById('chatInput');
+const connectionBadge = document.getElementById('connectionBadge');
+const chatError = document.getElementById('chatError');
+const chatPanelTitle = document.getElementById('chatPanelTitle');
+const chatPanelSubtitle = document.getElementById('chatPanelSubtitle');
+const workspaceLink = document.getElementById('workspaceLink');
+const notesLink = document.getElementById('notesLink');
+const modeTabs = Array.from(document.querySelectorAll('.chat-mode-tab'));
+
+let socket = null;
+let activeMode = 'ai';
+let bootstrapData = null;
+let aiMessages = [];
+let roomMessages = [];
+
+function escapeHtml(text) {
+    return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function showError(message) {
+    chatError.textContent = message;
+    chatError.classList.remove('d-none');
+}
+
+function clearError() {
+    chatError.classList.add('d-none');
+    chatError.textContent = '';
+}
+
+function setConnectionState(label, type) {
+    connectionBadge.className = 'pill';
+    connectionBadge.classList.add(type === 'ok' ? 'pill-success' : (type === 'error' ? 'pill-danger' : 'pill-warning'));
+    connectionBadge.textContent = label;
+}
+
+function renderMessages() {
+    const messages = activeMode === 'ai' ? aiMessages : roomMessages;
+
+    if (!messages.length) {
+        chatThread.innerHTML = `
+            <div class="empty-state" style="min-height: 300px;">
+                <div class="empty-state-inner">
+                    <div class="empty-state-icon"><i class="bi bi-chat-square-heart"></i></div>
+                    <h3>No messages yet</h3>
+                    <p>${activeMode === 'ai' ? 'Ask the AI tutor your first question.' : 'Start the first student room message for this subject.'}</p>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
-</div>
+        `;
+        return;
+    }
+
+    chatThread.innerHTML = messages.map((message) => {
+        if (activeMode === 'ai') {
+            const bubbleClass = message.role === 'assistant' ? 'chat-bubble-ai' : 'chat-bubble-user';
+            const label = message.role === 'assistant' ? 'AI Tutor' : 'You';
+            return `
+                <div class="chat-bubble ${bubbleClass}">
+                    <div class="chat-meta">${escapeHtml(label)}</div>
+                    <div>${escapeHtml(message.text).replace(/\\n/g, '<br>')}</div>
+                </div>
+            `;
+        }
+
+        const bubbleClass = Number(message.user_id) === Number(bootstrapData.user.id) ? 'chat-bubble-user' : 'chat-bubble-ai';
+        const label = Number(message.user_id) === Number(bootstrapData.user.id) ? 'You' : message.user_name;
+        return `
+            <div class="chat-bubble ${bubbleClass}">
+                <div class="chat-meta">${escapeHtml(label)}</div>
+                <div>${escapeHtml(message.text).replace(/\\n/g, '<br>')}</div>
+            </div>
+        `;
+    }).join('');
+
+    chatThread.scrollTop = chatThread.scrollHeight;
+}
+
+function updateTabUi() {
+    modeTabs.forEach((tab) => {
+        tab.classList.toggle('active', tab.dataset.mode === activeMode);
+    });
+
+    if (activeMode === 'ai') {
+        chatPanelTitle.textContent = 'AI Tutor 🤖';
+        chatPanelSubtitle.textContent = 'Private subject-wise conversation powered by Groq.';
+        chatInput.placeholder = 'Ask the AI tutor about this subject...';
+    } else {
+        chatPanelTitle.textContent = 'Student Room 👥';
+        chatPanelSubtitle.textContent = 'Live messages with other students in the same subject room.';
+        chatInput.placeholder = 'Write a message to the student room...';
+    }
+
+    renderMessages();
+}
+
+function closeSocket() {
+    if (socket) {
+        socket.onclose = null;
+        socket.close();
+        socket = null;
+    }
+}
+
+function connectSocket() {
+    closeSocket();
+    clearError();
+    setConnectionState('Connecting', 'warn');
+
+    socket = new WebSocket(`${bootstrapData.ws_url}?token=${encodeURIComponent(bootstrapData.token)}`);
+
+    socket.onopen = () => {
+        setConnectionState('Connected', 'ok');
+    };
+
+    socket.onclose = () => {
+        setConnectionState('Disconnected', 'error');
+    };
+
+    socket.onerror = () => {
+        setConnectionState('Error', 'error');
+        showError('Realtime connection failed. Make sure the WebSocket server is running.');
+    };
+
+    socket.onmessage = (event) => {
+        const payload = JSON.parse(event.data);
+
+        if (payload.type === 'error') {
+            showError(payload.message || 'Realtime error occurred.');
+            return;
+        }
+
+        if (payload.type === 'ai_message') {
+            aiMessages.push({
+                role: payload.role || 'assistant',
+                text: payload.text || ''
+            });
+            if (activeMode === 'ai') {
+                renderMessages();
+            }
+            return;
+        }
+
+        if (payload.type === 'room_message') {
+            roomMessages.push({
+                user_id: payload.user_id,
+                user_name: payload.user_name,
+                text: payload.text || ''
+            });
+            if (activeMode === 'room') {
+                renderMessages();
+            }
+        }
+    };
+}
+
+async function loadBootstrap(subjectId) {
+    clearError();
+    const response = await fetch(`${bootstrapUrl}?subject_id=${encodeURIComponent(subjectId)}`, { credentials: 'same-origin' });
+    const payload = await response.json();
+
+    if (!response.ok) {
+        throw new Error(payload.error || 'Unable to load chat.');
+    }
+
+    bootstrapData = payload;
+    aiMessages = payload.ai_history || [];
+    roomMessages = payload.room_history || [];
+    workspaceLink.href = `subject_workspace.php?subject_id=${payload.subject.id}`;
+    notesLink.href = `notes.php?subject_id=${payload.subject.id}`;
+
+    if (!payload.groq_configured) {
+        showError('Groq or realtime secret is not configured yet. Update config/runtime.json or environment variables.');
+    }
+
+    updateTabUi();
+    connectSocket();
+}
+
+subjectSelect.addEventListener('change', async () => {
+    const subjectId = subjectSelect.value;
+    history.replaceState({}, '', `chat.php?subject_id=${encodeURIComponent(subjectId)}`);
+    await loadBootstrap(subjectId);
+});
+
+modeTabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+        activeMode = tab.dataset.mode;
+        updateTabUi();
+    });
+});
+
+chatForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const text = chatInput.value.trim();
+    if (!text || !socket || socket.readyState !== WebSocket.OPEN) {
+        return;
+    }
+
+    if (activeMode === 'ai') {
+        aiMessages.push({ role: 'user', text });
+        renderMessages();
+        socket.send(JSON.stringify({
+            type: 'ai_message',
+            message: text,
+            history: aiMessages.slice(-12)
+        }));
+    } else {
+        socket.send(JSON.stringify({
+            type: 'student_message',
+            message: text
+        }));
+    }
+
+    chatInput.value = '';
+});
+
+loadBootstrap(subjectSelect.value).catch((error) => {
+    setConnectionState('Error', 'error');
+    showError(error.message || 'Unable to start chat.');
+});
+</script>
+<?php endif; ?>
 </body>
 </html>

@@ -100,3 +100,31 @@ study-planner/
 | Database   | MySQL             |
 | AI         | Claude API (Anthropic) |
 | Hosting    | XAMPP (local) / 000webhost (online) |
+
+---
+
+## Realtime Chat Setup
+
+The subject chat page now uses:
+- Groq API with `llama-3.1-8b-instant`
+- WebSocket server for realtime AI + student room chat
+
+### Configure
+Update:
+`config/runtime.json`
+
+Set:
+- `groq.api_key`
+- `realtime.shared_secret`
+- `realtime.ws_url`
+- `realtime.internal_base_url`
+
+### Run WebSocket Server
+From project root:
+
+```bash
+node studyplanner/realtime/chat-server.js
+```
+
+Default WebSocket URL:
+`ws://127.0.0.1:8081`

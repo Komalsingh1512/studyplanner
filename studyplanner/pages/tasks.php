@@ -40,7 +40,7 @@ if (isset($_GET['delete'])) {
 }
 
 // Get subjects for dropdown
-$sub_res  = mysqli_query($conn, "SELECT id, name FROM subjects WHERE user_id = $uid");
+$sub_res  = mysqli_query($conn, "SELECT id, name FROM subjects WHERE user_id = $uid ORDER BY created_at DESC, id DESC");
 $sub_list = [];
 while ($s = mysqli_fetch_assoc($sub_res)) $sub_list[] = $s;
 

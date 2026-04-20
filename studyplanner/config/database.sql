@@ -90,3 +90,17 @@ CREATE TABLE IF NOT EXISTS subject_chat_messages (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE CASCADE
 );
+
+-- Subject room messages table
+CREATE TABLE IF NOT EXISTS subject_room_messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    subject_id INT NOT NULL,
+    room_key VARCHAR(150) NOT NULL,
+    subject_name_snapshot VARCHAR(100) NOT NULL,
+    user_name_snapshot VARCHAR(100) NOT NULL,
+    message_text LONGTEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE CASCADE
+);
