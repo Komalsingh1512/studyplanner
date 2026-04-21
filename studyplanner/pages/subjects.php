@@ -15,6 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $completed  = (int)$_POST['completed_topics'];
     $difficulty = sanitize($_POST['difficulty']);
     $exam_date  = !empty($_POST['exam_date']) ? sanitize($_POST['exam_date']) : null;
+    $auto_generate_subtopics = isset($_POST['auto_generate_subtopics']);
 
     if (empty($name)) {
         $error = "Please enter subject name!";
@@ -32,7 +33,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         );
         mysqli_stmt_bind_param($stmt, "isiiss", $uid, $name, $total, $completed, $difficulty, $exam_date);
         if (mysqli_stmt_execute($stmt)) {
-            $success = "Subject added successfully!";
+            $subjectId = (int) mysqli_insert_id($conn);
+            $redirect = "subject_workspace.php?subject_id=" . $subjectId . "&msg=subject_created";
+            if ($auto_generate_subtopics) {
+                $redirect .= "&auto_generate=1";
+            }
+            header("Location: " . $redirect);
+            exit();
         } else {
             $error = "Unable to add subject. " . mysqli_error($conn);
         }
@@ -87,6 +94,34 @@ while ($row = mysqli_fetch_assoc($subtopics_result)) {
         $subtopics_by_subject[$subject_id] = [];
     }
     $subtopics_by_subject[$subject_id][] = $row;
+}
+
+$total_subjects = count($subjects);
+$passed_subjects = 0;
+$upcoming_subjects = 0;
+$total_subtopics = 0;
+$completed_subtopics_total = 0;
+
+foreach ($subjects as $subject) {
+    $daysLeft = $subject['exam_date']
+        ? (int)((strtotime($subject['exam_date']) - time()) / 86400)
+        : null;
+
+    if ($daysLeft !== null) {
+        if ($daysLeft < 0) {
+            $passed_subjects++;
+        } else {
+            $upcoming_subjects++;
+        }
+    }
+
+    $subjectSubtopics = $subtopics_by_subject[(int)$subject['id']] ?? [];
+    $total_subtopics += count($subjectSubtopics);
+    foreach ($subjectSubtopics as $subjectSubtopic) {
+        if ((int)$subjectSubtopic['is_completed'] === 1) {
+            $completed_subtopics_total++;
+        }
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -164,8 +199,52 @@ while ($row = mysqli_fetch_assoc($subtopics_result)) {
                             <label class="form-label">Exam Date</label>
                             <input type="date" name="exam_date" class="form-control">
                         </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="autoGenerateSubtopics" name="auto_generate_subtopics" checked>
+                            <label class="form-check-label" for="autoGenerateSubtopics">Auto-generate subtopics with AI</label>
+                            <div class="form-helper">Uses Groq `llama-3.1-8b-instant` when your Groq key is configured.</div>
+                        </div>
                         <button type="submit" class="btn btn-primary w-100">Add Subject 🚀</button>
                     </form>
+                </div>
+            </div>
+            <div class="sp-card fade-in-up mt-4">
+                <div class="sp-card-header">
+                    <div>
+                        <h6 class="sp-card-title">Subjects Summary 📈</h6>
+                    </div>
+                </div>
+                <div class="sp-card-body">
+                    <div class="mini-list">
+                        <div class="mini-list-row">
+                            <div>
+                                <strong><?= $total_subjects ?> total subjects</strong>
+                                <span>Your full study list</span>
+                            </div>
+                            <span class="pill pill-success"><?= $total_subjects ?></span>
+                        </div>
+                        <div class="mini-list-row">
+                            <div>
+                                <strong><?= $upcoming_subjects ?> upcoming exams</strong>
+                                <span>Subjects still in progress</span>
+                            </div>
+                            <span class="pill pill-warning"><?= $upcoming_subjects ?></span>
+                        </div>
+                        <div class="mini-list-row">
+                            <div>
+                                <strong><?= $passed_subjects ?> passed exams</strong>
+                                <span>Subjects you may archive later</span>
+                            </div>
+                            <span class="pill pill-danger"><?= $passed_subjects ?></span>
+                        </div>
+                        <div class="mini-list-row">
+                            <div>
+                                <strong><?= $completed_subtopics_total ?>/<?= $total_subtopics ?> subtopics done</strong>
+                                <span>Combined progress across subjects</span>
+                            </div>
+                            <span class="pill pill-success"><?= $completed_subtopics_total ?></span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
