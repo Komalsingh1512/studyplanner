@@ -67,6 +67,31 @@ $room_messages_table_sql = "CREATE TABLE IF NOT EXISTS subject_room_messages (
 
 mysqli_query($conn, $room_messages_table_sql);
 
+$subject_syllabus_column = mysqli_query($conn, "SHOW COLUMNS FROM subjects LIKE 'subject_syllabus'");
+if ($subject_syllabus_column && mysqli_num_rows($subject_syllabus_column) === 0) {
+    mysqli_query($conn, "ALTER TABLE subjects ADD COLUMN subject_syllabus TEXT NULL AFTER exam_date");
+}
+
+$ai_subtopic_target_column = mysqli_query($conn, "SHOW COLUMNS FROM subjects LIKE 'ai_subtopic_target'");
+if ($ai_subtopic_target_column && mysqli_num_rows($ai_subtopic_target_column) === 0) {
+    mysqli_query($conn, "ALTER TABLE subjects ADD COLUMN ai_subtopic_target INT NOT NULL DEFAULT 8 AFTER subject_syllabus");
+}
+
+$syllabus_file_name_column = mysqli_query($conn, "SHOW COLUMNS FROM subjects LIKE 'syllabus_file_name'");
+if ($syllabus_file_name_column && mysqli_num_rows($syllabus_file_name_column) === 0) {
+    mysqli_query($conn, "ALTER TABLE subjects ADD COLUMN syllabus_file_name VARCHAR(255) NULL AFTER ai_subtopic_target");
+}
+
+$syllabus_file_path_column = mysqli_query($conn, "SHOW COLUMNS FROM subjects LIKE 'syllabus_file_path'");
+if ($syllabus_file_path_column && mysqli_num_rows($syllabus_file_path_column) === 0) {
+    mysqli_query($conn, "ALTER TABLE subjects ADD COLUMN syllabus_file_path VARCHAR(255) NULL AFTER syllabus_file_name");
+}
+
+$syllabus_source_type_column = mysqli_query($conn, "SHOW COLUMNS FROM subjects LIKE 'syllabus_source_type'");
+if ($syllabus_source_type_column && mysqli_num_rows($syllabus_source_type_column) === 0) {
+    mysqli_query($conn, "ALTER TABLE subjects ADD COLUMN syllabus_source_type VARCHAR(30) NOT NULL DEFAULT 'text' AFTER syllabus_file_path");
+}
+
 $room_key_column = mysqli_query($conn, "SHOW COLUMNS FROM subject_room_messages LIKE 'room_key'");
 if ($room_key_column && mysqli_num_rows($room_key_column) === 0) {
     mysqli_query($conn, "ALTER TABLE subject_room_messages ADD COLUMN room_key VARCHAR(150) NOT NULL DEFAULT '' AFTER subject_id");

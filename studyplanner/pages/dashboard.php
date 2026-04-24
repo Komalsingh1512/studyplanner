@@ -5,6 +5,7 @@ requireLogin();
 
 $user = getCurrentUser();
 $uid  = $user['id'];
+$dashboard_subject_visible_limit = 4;
 
 // Subjects fetch
 $subjects_result = mysqli_query($conn, "SELECT * FROM subjects WHERE user_id = $uid ORDER BY created_at DESC, id DESC");
@@ -42,7 +43,7 @@ foreach ($tasks as $t) {
     <title>Dashboard — Study Planner</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="../assets/css/style.css?v=20260406-1433">
+    <link rel="stylesheet" href="../assets/css/style.css?v=20260424-1215">
 </head>
 <body>
 <div class="app-shell">
@@ -172,7 +173,8 @@ foreach ($tasks as $t) {
                             </div>
                         </div>
                     <?php else: ?>
-                        <?php foreach ($subjects as $sub):
+                        <div class="collapsible-list" id="dashboardSubjectsList" data-initial-visible="<?= $dashboard_subject_visible_limit ?>">
+                        <?php foreach ($subjects as $index => $sub):
                             $pct = $sub['total_topics'] > 0
                                 ? round(($sub['completed_topics'] / $sub['total_topics']) * 100)
                                 : 0;
@@ -180,8 +182,9 @@ foreach ($tasks as $t) {
                                 ? (int)((strtotime($sub['exam_date']) - time()) / 86400)
                                 : null;
                             $bar_color = $pct >= 70 ? 'bg-success' : ($pct >= 40 ? 'bg-warning' : 'bg-danger');
+                            $is_hidden_initially = $index >= $dashboard_subject_visible_limit;
                         ?>
-                        <div class="subject-row">
+                        <div class="subject-row collapsible-item<?= $is_hidden_initially ? ' is-hidden' : '' ?>">
                             <div class="subject-row-top">
                                 <div>
                                     <h3 class="subject-title"><?= htmlspecialchars($sub['name']) ?></h3>
@@ -212,6 +215,20 @@ foreach ($tasks as $t) {
                             </div>
                         </div>
                         <?php endforeach; ?>
+                        </div>
+                        <?php if (count($subjects) > $dashboard_subject_visible_limit): ?>
+                            <div class="list-reveal-wrap">
+                                <button
+                                    type="button"
+                                    class="btn btn-outline-primary list-reveal-btn"
+                                    data-list-id="dashboardSubjectsList"
+                                    data-show-text="Show more subjects"
+                                    data-hide-text="Close subjects"
+                                >
+                                    Show more subjects
+                                </button>
+                            </div>
+                        <?php endif; ?>
                     <?php endif; ?>
                 </div>
             </div>
@@ -295,5 +312,34 @@ foreach ($tasks as $t) {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.querySelectorAll('.list-reveal-btn').forEach((button) => {
+    button.addEventListener('click', () => {
+        const list = document.getElementById(button.dataset.listId);
+        if (!list) {
+            return;
+        }
+
+        const items = Array.from(list.querySelectorAll('.collapsible-item'));
+        const hiddenItems = list.querySelectorAll('.collapsible-item.is-hidden');
+        const initialVisible = parseInt(list.dataset.initialVisible || items.length, 10);
+        const isExpanded = hiddenItems.length === 0;
+
+        if (isExpanded) {
+            items.forEach((item, index) => {
+                if (index >= initialVisible) {
+                    item.classList.add('is-hidden');
+                }
+            });
+            button.textContent = button.dataset.showText || 'Show more';
+            list.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            return;
+        }
+
+        items.forEach((item) => item.classList.remove('is-hidden'));
+        button.textContent = button.dataset.hideText || 'Close';
+    });
+});
+</script>
 </body>
 </html>

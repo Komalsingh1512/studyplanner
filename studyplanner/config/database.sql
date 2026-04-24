@@ -22,6 +22,11 @@ CREATE TABLE IF NOT EXISTS subjects (
     completed_topics INT DEFAULT 0,
     difficulty ENUM('easy', 'medium', 'hard') DEFAULT 'medium',
     exam_date DATE,
+    subject_syllabus TEXT,
+    ai_subtopic_target INT NOT NULL DEFAULT 8,
+    syllabus_file_name VARCHAR(255),
+    syllabus_file_path VARCHAR(255),
+    syllabus_source_type VARCHAR(30) NOT NULL DEFAULT 'text',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );

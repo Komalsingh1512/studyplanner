@@ -348,7 +348,7 @@ a:hover {
 }
 
 .stat-card {
-    height: 100%;
+    height: auto;
     padding: 1.2rem 1.25rem;
 }
 
@@ -395,7 +395,7 @@ a:hover {
 }
 
 .sp-card {
-    height: 100%;
+    height: auto;
 }
 
 .sp-card-header {
@@ -428,6 +428,19 @@ a:hover {
 .stack-sm {
     display: grid;
     gap: 0.8rem;
+}
+
+.subjects-side-stack,
+.workspace-side-stack {
+    display: grid;
+    gap: 1rem;
+    align-content: start;
+}
+
+.workspace-card-auto,
+.subjects-side-stack .sp-card,
+.workspace-side-stack .sp-card {
+    height: auto;
 }
 
 .subject-row,
@@ -583,7 +596,7 @@ a:hover {
 }
 
 .empty-state {
-    min-height: 100%;
+    min-height: 220px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -866,6 +879,7 @@ a:hover {
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
     gap: 1rem;
+    align-items: start;
 }
 
 .dashboard-main {
@@ -879,6 +893,15 @@ a:hover {
 .section-stack {
     display: grid;
     gap: 1rem;
+    align-content: start;
+}
+
+.dashboard-main .sp-card,
+.dashboard-side .sp-card,
+.dashboard-main .empty-state,
+.dashboard-side .empty-state,
+.row.align-items-start > [class*="col-"] > .sp-card {
+    height: auto;
 }
 
 .ai-output {
@@ -1198,6 +1221,39 @@ a:hover {
 
 .subtopic-toggle-form {
     flex-shrink: 0;
+}
+
+.collapsible-item.is-hidden {
+    display: none;
+}
+
+.list-reveal-wrap {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+}
+
+.list-reveal-btn {
+    min-width: 220px;
+}
+
+.syllabus-preview-card {
+    padding: 1rem;
+    border-radius: 1rem;
+    background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(245,247,255,0.92));
+    border: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.syllabus-preview-card strong {
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.syllabus-preview-card p {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.7;
+    white-space: normal;
 }
 
 .chat-layout {

@@ -66,11 +66,23 @@ while ($row = mysqli_fetch_assoc($existing_result)) {
     $existingTitles[strtolower(trim($row['title']))] = true;
 }
 
-$count = max(6, min(12, (int) ceil(max(1, (int) $subject['total_topics']) / 5)));
+$configuredCount = isset($subject['ai_subtopic_target']) ? (int) $subject['ai_subtopic_target'] : 5;
+$count = max(1, min(25, $configuredCount));
+$syllabus = trim((string) ($subject['subject_syllabus'] ?? ''));
+$syllabusFileName = trim((string) ($subject['syllabus_file_name'] ?? ''));
 $prompt = "Generate {$count} practical study subtopics for the subject \"{$subject['name']}\".\n"
     . "Difficulty: {$subject['difficulty']}\n"
-    . "Total topics in syllabus: {$subject['total_topics']}\n\n"
-    . "Return ONLY a JSON array of concise subtopic names. No explanation. No markdown.";
+    . "Total topics in syllabus tracker: {$subject['total_topics']}\n"
+    . "You must return exactly {$count} subtopics and never more than {$count}.\n";
+
+if ($syllabus !== '') {
+    $prompt .= "Use this syllabus as the primary source when deciding the subtopics:\n{$syllabus}\n\n";
+} else {
+    $prompt .= "No detailed syllabus was provided, so infer a balanced structure from the subject name.\n\n";
+}
+
+$prompt .= "Return ONLY a JSON array of concise subtopic names.\n"
+    . "No explanation. No markdown. No numbering.";
 
 $payload = json_encode([
     'model' => getGroqModel(),
@@ -130,6 +142,8 @@ foreach ($items as $item) {
     $normalized[] = $item;
 }
 
+$normalized = array_slice($normalized, 0, $count);
+
 if (empty($normalized)) {
     echo json_encode(['ok' => true, 'created' => 0, 'message' => 'No new subtopics were generated']);
     exit();
@@ -147,6 +161,8 @@ foreach ($normalized as $subtopicTitle) {
 echo json_encode([
     'ok' => true,
     'created' => $created,
-    'message' => $created > 0 ? $created . ' AI subtopics generated successfully' : 'No new subtopics were created'
+    'message' => $created > 0
+        ? $created . ' AI subtopics generated from the saved syllabus' . ($syllabusFileName !== '' ? ' file' : '') . '.'
+        : 'No new subtopics were created'
 ]);
 ?>
