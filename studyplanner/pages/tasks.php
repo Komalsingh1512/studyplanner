@@ -63,7 +63,7 @@ while ($row = mysqli_fetch_assoc($tasks_result)) $tasks[] = $row;
     <title>Tasks — Study Planner</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="../assets/css/style.css?v=20260424-1215">
+    <link rel="stylesheet" href="../assets/css/style.css?v=20260504-1835">
 </head>
 <body>
 <div class="app-shell">

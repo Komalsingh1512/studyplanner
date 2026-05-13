@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Login — Study Planner</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="../assets/css/style.css?v=20260406-1433">
+    <link rel="stylesheet" href="../assets/css/style.css?v=20260504-1835">
 </head>
 <body class="auth-page">
 <div class="auth-layout fade-in-up">
