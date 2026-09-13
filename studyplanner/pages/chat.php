@@ -26,6 +26,7 @@ if ($selected_subject === 0 && !empty($subjects)) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="../assets/css/style.css?v=20260504-1835">
+    <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
 </head>
 <body>
 <div class="app-shell">
@@ -51,7 +52,7 @@ if ($selected_subject === 0 && !empty($subjects)) {
                 Realtime Chat 🔒
             </div>
             <h1 class="page-title">Study chat with AI and students</h1>
-            <p class="page-subtitle">Use a secure WebSocket connection for Groq-powered AI tutoring and a live student room for each subject.</p>
+            <p class="page-subtitle">Use a secure real-time connection for AI tutoring and a live student room for each subject.</p>
         </div>
     </div>
 
@@ -88,8 +89,8 @@ if ($selected_subject === 0 && !empty($subjects)) {
                             <span id="connectionBadge" class="pill pill-warning">Connecting</span>
                         </div>
                         <div class="chat-status-row">
-                            <span class="section-note">Groq Model</span>
-                            <span class="soft-badge">llama-3.1-8b-instant</span>
+                            <span class="section-note">AI Engine</span>
+                            <span class="soft-badge">Active</span>
                         </div>
                         <div class="chat-status-row">
                             <span class="section-note">Transport</span>
@@ -165,6 +166,25 @@ function escapeHtml(text) {
         .replace(/'/g, '&#039;');
 }
 
+if (window.marked) {
+    marked.setOptions({ breaks: true });
+}
+
+function renderPlainText(text) {
+    return escapeHtml(text).replace(/\n/g, '<br>');
+}
+
+// AI tutor replies are Markdown (headings, tables, lists). Render them with
+// marked.js, same as the AI Study Plan page. User-typed text (both the "You"
+// bubbles in AI Tutor and every Student Room message) is never parsed as
+// Markdown and stays plain/escaped, since it comes from other people.
+function renderAiText(text) {
+    if (!window.marked) {
+        return renderPlainText(text);
+    }
+    return `<div class="ai-output">${marked.parse(String(text || ''))}</div>`;
+}
+
 function showError(message) {
     chatError.textContent = message;
     chatError.classList.remove('d-none');
@@ -199,12 +219,14 @@ function renderMessages() {
 
     chatThread.innerHTML = messages.map((message) => {
         if (activeMode === 'ai') {
-            const bubbleClass = message.role === 'assistant' ? 'chat-bubble-ai' : 'chat-bubble-user';
-            const label = message.role === 'assistant' ? 'AI Tutor' : 'You';
+            const isAssistant = message.role === 'assistant';
+            const bubbleClass = isAssistant ? 'chat-bubble-ai' : 'chat-bubble-user';
+            const label = isAssistant ? 'AI Tutor' : 'You';
+            const body = isAssistant ? renderAiText(message.text) : renderPlainText(message.text);
             return `
                 <div class="chat-bubble ${bubbleClass}">
                     <div class="chat-meta">${escapeHtml(label)}</div>
-                    <div>${escapeHtml(message.text).replace(/\\n/g, '<br>')}</div>
+                    <div>${body}</div>
                 </div>
             `;
         }
@@ -214,7 +236,7 @@ function renderMessages() {
         return `
             <div class="chat-bubble ${bubbleClass}">
                 <div class="chat-meta">${escapeHtml(label)}</div>
-                <div>${escapeHtml(message.text).replace(/\\n/g, '<br>')}</div>
+                <div>${renderPlainText(message.text)}</div>
             </div>
         `;
     }).join('');
@@ -229,7 +251,7 @@ function updateTabUi() {
 
     if (activeMode === 'ai') {
         chatPanelTitle.textContent = 'AI Tutor 🤖';
-        chatPanelSubtitle.textContent = 'Private subject-wise conversation powered by Groq.';
+        chatPanelSubtitle.textContent = 'Private subject-wise conversation with your AI tutor.';
         chatInput.placeholder = 'Ask the AI tutor about this subject...';
     } else {
         chatPanelTitle.textContent = 'Student Room 👥';
@@ -248,12 +270,40 @@ function closeSocket() {
     }
 }
 
+function resolveWsUrl(configuredUrl) {
+    try {
+        const url = new URL(configuredUrl);
+        const pageHost = window.location.hostname;
+        const isLoopbackConfigured = url.hostname === '127.0.0.1' || url.hostname === 'localhost';
+        const isLoopbackPage = pageHost === '127.0.0.1' || pageHost === 'localhost';
+
+        // If the configured host is a loopback address but the page itself was
+        // opened from a different machine/IP, ws://127.0.0.1 would point back
+        // at that other machine's own (nonexistent) server. Swap in the page's
+        // actual hostname so the browser reaches the same host the page came from.
+        if (isLoopbackConfigured && !isLoopbackPage) {
+            url.hostname = pageHost;
+        }
+
+        // Browsers block plain ws:// connections from an https:// page
+        // (mixed content). If the site is served over https, upgrade to wss://.
+        if (window.location.protocol === 'https:' && url.protocol === 'ws:') {
+            url.protocol = 'wss:';
+        }
+
+        return url.toString();
+    } catch (error) {
+        return configuredUrl;
+    }
+}
+
 function connectSocket() {
     closeSocket();
     clearError();
     setConnectionState('Connecting', 'warn');
 
-    socket = new WebSocket(`${bootstrapData.ws_url}?token=${encodeURIComponent(bootstrapData.token)}`);
+    const wsUrl = resolveWsUrl(bootstrapData.ws_url);
+    socket = new WebSocket(`${wsUrl}?token=${encodeURIComponent(bootstrapData.token)}`);
 
     socket.onopen = () => {
         setConnectionState('Connected', 'ok');
@@ -265,7 +315,7 @@ function connectSocket() {
 
     socket.onerror = () => {
         setConnectionState('Error', 'error');
-        showError('Realtime connection failed. Make sure the WebSocket server is running.');
+        showError('Realtime connection failed. Make sure the WebSocket server (node realtime/chat-server.js) is running and reachable at ' + wsUrl + '.');
     };
 
     socket.onmessage = (event) => {
@@ -316,7 +366,7 @@ async function loadBootstrap(subjectId) {
     notesLink.href = `notes.php?subject_id=${payload.subject.id}`;
 
     if (!payload.groq_configured) {
-        showError('Groq or realtime secret is not configured yet. Update config/runtime.json or environment variables.');
+        showError('AI chat is not configured yet. Update config/runtime.json or environment variables.');
     }
 
     updateTabUi();

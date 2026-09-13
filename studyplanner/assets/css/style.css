@@ -909,10 +909,79 @@ a:hover {
     border: 1px solid rgba(15, 23, 42, 0.08);
     border-radius: 1.2rem;
     padding: 1.35rem;
-    white-space: pre-wrap;
     font-size: 0.95rem;
     line-height: 1.85;
     color: var(--text);
+}
+
+.ai-output h1,
+.ai-output h2,
+.ai-output h3 {
+    margin-top: 1.4rem;
+    margin-bottom: 0.6rem;
+    font-weight: 700;
+    color: var(--primary-dark, #111827);
+}
+
+.ai-output h1:first-child,
+.ai-output h2:first-child,
+.ai-output h3:first-child {
+    margin-top: 0;
+}
+
+.ai-output p {
+    margin-bottom: 0.75rem;
+}
+
+.ai-output hr {
+    margin: 1.25rem 0;
+    border-top: 1px solid rgba(15, 23, 42, 0.1);
+}
+
+.ai-output ul,
+.ai-output ol {
+    padding-left: 1.4rem;
+    margin-bottom: 0.75rem;
+}
+
+.ai-output blockquote {
+    margin: 0.75rem 0;
+    padding: 0.6rem 1rem;
+    border-left: 3px solid rgba(37, 99, 235, 0.45);
+    background: rgba(37, 99, 235, 0.06);
+    border-radius: 0.5rem;
+    color: var(--text);
+}
+
+.ai-output table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.75rem 0 1.1rem;
+    font-size: 0.9rem;
+}
+
+.ai-output th,
+.ai-output td {
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    padding: 0.5rem 0.7rem;
+    text-align: left;
+    vertical-align: top;
+}
+
+.ai-output th {
+    background: rgba(37, 99, 235, 0.08);
+    font-weight: 700;
+}
+
+.ai-output tr:nth-child(even) td {
+    background: rgba(148, 163, 184, 0.06);
+}
+
+.ai-output code {
+    background: rgba(15, 23, 42, 0.06);
+    padding: 0.1rem 0.35rem;
+    border-radius: 0.35rem;
+    font-size: 0.88rem;
 }
 
 .note-content {

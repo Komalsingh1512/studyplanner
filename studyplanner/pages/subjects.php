@@ -257,7 +257,7 @@ foreach ($subjects as $subject) {
                             <div class="form-check form-switch mb-3">
                                 <input class="form-check-input" type="checkbox" id="autoGenerateSubtopics" name="auto_generate_subtopics" checked>
                                 <label class="form-check-label" for="autoGenerateSubtopics">Auto-generate subtopics with AI</label>
-                                <div class="form-helper">Uses your syllabus and target count when Groq is configured.</div>
+                                <div class="form-helper">Uses your syllabus and target count when AI generation is configured.</div>
                             </div>
                             <button type="submit" class="btn btn-primary w-100">Add Subject</button>
                         </form>

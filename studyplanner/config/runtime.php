@@ -43,7 +43,7 @@ function getGroqApiKey() {
 }
 
 function getGroqModel() {
-    return trim((string) runtimeConfigValue(['groq', 'model'], 'llama-3.1-8b-instant'));
+    return trim((string) runtimeConfigValue(['groq', 'model'], 'openai/gpt-oss-20b'));
 }
 
 function getGroqApiUrl() {

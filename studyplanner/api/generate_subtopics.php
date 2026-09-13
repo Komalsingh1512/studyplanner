@@ -84,10 +84,11 @@ if ($syllabus !== '') {
 $prompt .= "Return ONLY a JSON array of concise subtopic names.\n"
     . "No explanation. No markdown. No numbering.";
 
-$payload = json_encode([
-    'model' => getGroqModel(),
+$model_name = getGroqModel();
+$payload_data = [
+    'model' => $model_name,
     'temperature' => 0.3,
-    'max_tokens' => 600,
+    'max_tokens' => min(3000, max(600, 60 * $count + 300)),
     'messages' => [
         [
             'role' => 'system',
@@ -98,7 +99,14 @@ $payload = json_encode([
             'content' => $prompt
         ]
     ]
-]);
+];
+// GPT-OSS models spend part of the token budget on hidden reasoning before
+// writing the final answer; keeping that light leaves more budget for the
+// actual JSON output. Other model families don't support this parameter.
+if (stripos($model_name, 'gpt-oss') !== false) {
+    $payload_data['reasoning_effort'] = 'low';
+}
+$payload = json_encode($payload_data);
 
 $ch = curl_init(getGroqApiUrl());
 curl_setopt_array($ch, [
@@ -118,8 +126,26 @@ $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
 if ($response === false || $httpCode < 200 || $httpCode >= 300) {
+    // Try to surface Groq's actual error message instead of a generic string,
+    // since curl_error() is empty whenever the HTTP request itself succeeded
+    // but Groq responded with a non-2xx status (bad key, bad/decommissioned
+    // model, rate limit, etc).
+    $groqMessage = '';
+    if ($response !== false && $response !== '') {
+        $decodedError = json_decode($response, true);
+        if (is_array($decodedError)) {
+            $groqMessage = (string) ($decodedError['error']['message'] ?? $decodedError['error'] ?? '');
+        }
+    }
+
+    error_log('Groq generate_subtopics failed: http=' . $httpCode . ' curl=' . $curlError . ' body=' . $response);
+
     http_response_code(502);
-    echo json_encode(['error' => $curlError !== '' ? $curlError : 'Groq request failed']);
+    echo json_encode([
+        'error' => $curlError !== ''
+            ? $curlError
+            : ($groqMessage !== '' ? 'Groq request failed: ' . $groqMessage : 'Groq request failed (HTTP ' . $httpCode . ')')
+    ]);
     exit();
 }
 

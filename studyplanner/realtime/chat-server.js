@@ -10,7 +10,7 @@ const sharedSecret = process.env.STUDYPLANNER_REALTIME_SECRET || runtime.realtim
 const internalBaseUrl = runtime.realtime.internal_base_url || 'http://127.0.0.1/studyplanner/studyplanner';
 const groqApiKey = process.env.GROQ_API_KEY || runtime.groq.api_key || '';
 const groqApiUrl = runtime.groq.api_url || 'https://api.groq.com/openai/v1/chat/completions';
-const groqModel = runtime.groq.model || 'llama-3.1-8b-instant';
+const groqModel = runtime.groq.model || 'openai/gpt-oss-20b';
 const port = Number(process.env.STUDYPLANNER_WS_PORT || 8081);
 
 const clients = new Set();
@@ -180,18 +180,23 @@ async function handleAiMessage(client, data) {
   ];
 
   try {
+    const requestBody = {
+      model: groqModel,
+      temperature: 0.4,
+      max_tokens: 1024,
+      messages
+    };
+    if (groqModel.toLowerCase().includes('gpt-oss')) {
+      requestBody.reasoning_effort = 'low';
+    }
+
     const response = await fetch(groqApiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${groqApiKey}`
       },
-      body: JSON.stringify({
-        model: groqModel,
-        temperature: 0.4,
-        max_tokens: 1024,
-        messages
-      })
+      body: JSON.stringify(requestBody)
     });
 
     const payload = await response.json();

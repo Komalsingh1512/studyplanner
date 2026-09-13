@@ -1,7 +1,7 @@
 {
   "groq": {
-    "api_key": "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",
-    "model": "llama-3.1-8b-instant",
+    "api_key": "YOUR_GROQ_API_KEY_HERE",
+    "model": "openai/gpt-oss-20b",
     "api_url": "https://api.groq.com/openai/v1/chat/completions"
   },
   "realtime": {
