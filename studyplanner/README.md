@@ -1,9 +1,10 @@
 # Study Planner
 
-An AI-assisted study planning and revision platform for students, built with PHP, MySQL, and a
-custom real-time WebSocket layer. Students can track subjects and syllabus progress, auto-generate
-subtopics from an uploaded syllabus, log tasks and notes, get an AI-generated day-by-day revision
-plan, and chat with an AI tutor (or other students in the same subject) in real time.
+**Study Planner** is an AI-powered educational web application designed to help students organize their learning and revision. Built with a PHP and MySQL backend alongside a custom Node.js WebSocket server, the platform allows users to:
+- **Organize Subjects:** Upload syllabus files (PDF/DOCX) which are automatically parsed and broken down into actionable subtopics using AI.
+- **Generate Study Plans:** Instantly create tailored, day-by-day revision schedules based on exam dates, difficulty, and current progress.
+- **Chat in Real-Time:** Engage with a dedicated AI tutor for subject-specific help, or chat live with other students studying the same subject in shared rooms.
+- **Track Progress:** Log study sessions, take notes, and manage daily tasks in a clean, responsive dashboard.
 
 ---
 
