@@ -326,6 +326,7 @@ server.on('upgrade', (req, socket) => {
               await handleAiMessage(client, data);
             }
           } catch (error) {
+            console.error('Realtime payload/handling error:', error);
             sendJson(socket, { type: 'error', message: 'Invalid realtime payload.' });
           }
         }

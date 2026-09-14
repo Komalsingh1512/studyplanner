@@ -160,7 +160,7 @@ Edit `config/runtime.json`:
   },
   "realtime": {
     "ws_url": "ws://127.0.0.1:8081",
-    "internal_base_url": "http://127.0.0.1/studyplanner/studyplanner",
+    "internal_base_url": "http://127.0.0.1:8000",
     "shared_secret": "choose-a-long-random-string"
   }
 }
@@ -173,8 +173,11 @@ file directly — the code checks the environment first.
 > so a personal API key is never required from end users of the app.
 
 ### 6. Run the app
-Visit `http://localhost/studyplanner/studyplanner` (adjust the path to wherever you copied the
-project) and register a new account.
+You can start the PHP built-in development server by running this in your terminal from the project root:
+```bash
+php -S 127.0.0.1:8000 -t .
+```
+Visit `http://127.0.0.1:8000` and register a new account.
 
 ---
 
@@ -183,7 +186,7 @@ project) and register a new account.
 The subject chat feature (`pages/chat.php`) needs the Node process running alongside Apache:
 
 ```bash
-node studyplanner/realtime/chat-server.js
+node realtime/chat-server.js
 ```
 
 By default it listens on `ws://127.0.0.1:8081` (configurable via `STUDYPLANNER_WS_PORT`). Convenience
