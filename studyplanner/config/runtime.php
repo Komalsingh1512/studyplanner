@@ -51,10 +51,18 @@ function getGroqApiUrl() {
 }
 
 function getRealtimeWsUrl() {
+    $envWsUrl = getenv('STUDYPLANNER_WS_URL');
+    if (!empty($envWsUrl)) {
+        return trim($envWsUrl);
+    }
     return trim((string) runtimeConfigValue(['realtime', 'ws_url'], 'ws://127.0.0.1:8081'));
 }
 
 function getRealtimeInternalBaseUrl() {
+    $envInternalBaseUrl = getenv('STUDYPLANNER_INTERNAL_BASE_URL');
+    if (!empty($envInternalBaseUrl)) {
+        return trim($envInternalBaseUrl);
+    }
     return trim((string) runtimeConfigValue(['realtime', 'internal_base_url'], 'http://127.0.0.1/studyplanner/studyplanner'));
 }
 

@@ -7,11 +7,11 @@ const runtimePath = path.join(__dirname, '..', 'config', 'runtime.json');
 const runtime = JSON.parse(fs.readFileSync(runtimePath, 'utf8'));
 
 const sharedSecret = process.env.STUDYPLANNER_REALTIME_SECRET || runtime.realtime.shared_secret || '';
-const internalBaseUrl = runtime.realtime.internal_base_url || 'http://127.0.0.1/studyplanner/studyplanner';
+const internalBaseUrl = process.env.STUDYPLANNER_INTERNAL_BASE_URL || runtime.realtime.internal_base_url || 'http://127.0.0.1/studyplanner/studyplanner';
 const groqApiKey = process.env.GROQ_API_KEY || runtime.groq.api_key || '';
-const groqApiUrl = runtime.groq.api_url || 'https://api.groq.com/openai/v1/chat/completions';
-const groqModel = runtime.groq.model || 'openai/gpt-oss-20b';
-const port = Number(process.env.STUDYPLANNER_WS_PORT || 8081);
+const groqApiUrl = process.env.GROQ_API_URL || runtime.groq.api_url || 'https://api.groq.com/openai/v1/chat/completions';
+const groqModel = process.env.GROQ_MODEL || runtime.groq.model || 'openai/gpt-oss-20b';
+const port = Number(process.env.PORT || process.env.STUDYPLANNER_WS_PORT || 8081);
 
 const clients = new Set();
 

@@ -1,12 +1,12 @@
 {
   "groq": {
-    "api_key": "YOUR_GROQ_API_KEY_HERE",
+    "api_key": "",
     "model": "openai/gpt-oss-20b",
     "api_url": "https://api.groq.com/openai/v1/chat/completions"
   },
   "realtime": {
     "ws_url": "ws://127.0.0.1:8081",
-    "internal_base_url": "http://127.0.0.1/studyplanner/studyplanner",
+    "internal_base_url": "http://127.0.0.1:8000",
     "shared_secret": "studyplanner-realtime-secret-2026-04-20-secure-channel"
   }
 }
